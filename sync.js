@@ -1,6 +1,8 @@
 // Firebase(Firestore) 연동 — firebase-config.js에 설정이 있고, 연동 코드(room)가 있을 때만 동작
 const cfg=window.FIREBASE_CONFIG;
-let room=null; try{ room=JSON.parse(localStorage.getItem('samttuk.room')||'null'); }catch{}
+let room=null;
+try{ const r=new URLSearchParams(location.search).get('room'); if(r && /^[a-z0-9]{12,40}$/.test(r)) localStorage.setItem('samttuk.room',JSON.stringify(r)); }catch{}
+try{ room=JSON.parse(localStorage.getItem('samttuk.room')||'null'); }catch{}
 if(cfg && room){
   try{
     const V='10.12.2';
