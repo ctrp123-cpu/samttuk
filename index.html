@@ -19,7 +19,7 @@ label{display:flex;gap:6px;align-items:center;justify-content:center;font-size:1
 <label><input type="checkbox" id="rem" checked style="width:auto;margin:0"> 이 기기에서 기억하기</label>
 <button>열기</button><div class="e" id="err"></div></form></div>
 <script>
-const VER='20261102120223', KEYNAME='samttuk.k';
+const VER='20261102120242', KEYNAME='samttuk.k';
 const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 let blob=null;
 async function getBlob(){ if(!blob){ const r=await fetch('site.enc?v='+VER,{cache:'no-store'}); blob=await r.json(); } return blob; }

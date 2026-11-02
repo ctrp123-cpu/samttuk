@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>삼뚝이 준비 노트</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#fbf7f3"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="삼뚝이">
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;background:#fbf7f3;color:#2b2724;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+.b{background:#fff;border:1px solid #efe7df;border-radius:18px;padding:28px 22px;width:100%;max-width:360px;text-align:center}
+h1{font-size:22px;margin:0 0 6px}p{color:#7d746d;font-size:14px;margin:0 0 18px}
+input{width:100%;box-sizing:border-box;font-size:17px;padding:12px;border:1px solid #e3d8ce;border-radius:12px;margin-bottom:10px}
+button{width:100%;font-size:16px;font-weight:700;padding:12px;border:none;border-radius:12px;background:#2b2724;color:#fff;cursor:pointer}
+label{display:flex;gap:6px;align-items:center;justify-content:center;font-size:13px;color:#7d746d;margin:4px 0 14px}
+.e{color:#c0392b;font-size:13px;min-height:18px;margin-top:8px}
+</style></head><body>
+<div class="b" id="box"><h1>👶 삼뚝이 준비 노트</h1><p>비밀번호를 입력해 주세요</p>
+<form id="f"><input type="password" id="pw" autocomplete="current-password" placeholder="비밀번호">
+<label><input type="checkbox" id="rem" checked style="width:auto;margin:0"> 이 기기에서 기억하기</label>
+<button>열기</button><div class="e" id="err"></div></form></div>
+<script>
+const VER='__VER__', KEYNAME='samttuk.k';
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+let blob=null;
+async function getBlob(){ if(!blob){ const r=await fetch('site.enc?v='+VER,{cache:'no-store'}); blob=await r.json(); } return blob; }
+async function keyFromPw(pw,salt,iter){ const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},true,['decrypt']); }
+async function decryptWith(pw){ const d=await getBlob(); const k=await keyFromPw(pw,b64(d.salt),d.iter);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(d.iv)},k,b64(d.ct)); return new TextDecoder().decode(pt); }
+function show(html){ document.open(); document.write(html); document.close(); }
+(async()=>{
+  let saved=null; try{ saved=localStorage.getItem(KEYNAME); }catch{}
+  if(saved){ try{ show(await decryptWith(saved)); return; }catch(e){ try{ localStorage.removeItem(KEYNAME); }catch{} } }
+  document.getElementById('pw').focus();
+})();
+document.getElementById('f').onsubmit=async e=>{ e.preventDefault(); const pw=document.getElementById('pw').value; const err=document.getElementById('err'); err.textContent='여는 중…';
+  try{ const html=await decryptWith(pw); if(document.getElementById('rem').checked){ try{ localStorage.setItem(KEYNAME,pw); }catch{} } show(html); }
+  catch{ err.textContent='비밀번호가 맞지 않아요'; } };
+</script></body></html>
